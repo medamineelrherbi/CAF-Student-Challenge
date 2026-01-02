@@ -15,6 +15,24 @@ By leveraging predictive management, organizers can proactively deploy security 
 
 ![Project Architecture](architecture.png)
 
+## ⚡ Incremental Streaming vs. Continuous Streaming
+
+This pipeline is built using **Triggered Incremental Streaming** (Spark Structured Streaming with `availableNow=True`). Unlike traditional 24/7 continuous streaming, this method processes only the data that has arrived since the last run.
+
+### **Why it’s better for the CAN 2025 Project:**
+
+| Feature | Continuous Streaming | **Incremental Streaming (This Project)** |
+| :--- | :--- | :--- |
+| **Cost** | 💸 **High**: Clusters must run 24/7 even if no match is happening. | 💰 **Low**: Clusters only spin up to process new sensor bursts, then shut down. |
+| **Latency** | Milliseconds. | Seconds to Minutes (Perfect for match-day updates). |
+| **Resources** | Consumes compute power constantly. | High efficiency; processes only the "deltas" (new data). |
+| **Maintenance** | Requires constant monitoring for long-running jobs. | More robust; easier to orchestrate via Databricks Workflows. |
+
+### **Key Benefits:**
+1. **Cost Efficiency:** Since Africa Cup of Nations matches happen at specific times, we don't need to pay for 24/7 compute. The pipeline "wakes up," processes the latest crowd/weather data, and stops.
+2. **Scalability:** It handles "spiky" data perfectly—such as the massive surge of ticketing and sensor data 30 minutes before kickoff—without requiring a massive permanent infrastructure.
+3. **Reliability:** By using Delta Lake checkpoints, the pipeline ensures **Exactly-Once** processing. If a job fails, it resumes exactly where it left off, never processing the same risk event twice.
+
 ## 🏗️ Architecture: Medallion Design
 The pipeline follows the **Medallion Architecture** to ensure data reliability and scalability using **Databricks**, **Spark Structured Streaming**, and **Delta Lake**.
 
